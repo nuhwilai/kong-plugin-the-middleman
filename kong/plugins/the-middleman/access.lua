@@ -4,6 +4,7 @@ local json = require "cjson"
 
 local str_gsub, str_upper, str_lower = string.gsub, string.upper, string.lower
 local kong = kong
+local kong_response = kong.response
 local error = error
 local md5 = ngx.md5
 
@@ -138,6 +139,13 @@ function _M.execute(conf, version)
   end
 
   -- inject the body response into the header
+
+  if response.status > 299 then
+    return kong_response.exit(response.status, response.body, {
+      ["Content-Type"] = "application/json",
+    })
+  end
+
   inject_body_response_into_header(conf, response)
 
 end
